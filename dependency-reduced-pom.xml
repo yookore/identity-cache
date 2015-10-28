@@ -105,6 +105,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <minimizeJar>true</minimizeJar>
               <transformers>
                 <transformer />
                 <transformer>
