@@ -119,7 +119,7 @@ object Config {
       val nodes = Array(
           ClusterNode("yks-redis01.mid.cpwv.com", "192.168.121.165", 6379),
           ClusterNode("yks-redis02.mid.cpwv.com", "192.168.121.166", 6379),
-          ClusterNode("yks-redis04.mid.cpwv.com", "192.168.121.168", 6379)
+          ClusterNode("yks-redis04.mid.cpwv.com", "192.168.121.167", 6379)
         )
       val r = new RedisCluster(new WrappedArray.ofRef(nodes): _*) {
         val keyTag = Some(RegexKeyTag)
@@ -130,7 +130,8 @@ object Config {
   def dataSourceUrl(env: String, name: Option[String]): String = env match {
     case "local" => 
       val dbSourceName = name.getOrElse("")
-      val mappings = s"jdbc:postgresql://localhost:5432/uaa?user=root&password=P@ssw0rd15"
+      //val mappings = s"jdbc:postgresql://localhost:5432/uaa?user=root&password=P@ssw0rd15"
+      val mappings = s"jdbc:postgresql://10.10.10.227:5432/uaa?user=postgres&password=postgres"
       val legacy = s"jdbc:postgresql://localhost:5432/uaa?user=root&password=P@ssw0rd15"
       if (dbSourceName == "mappings") mappings else legacy
 
@@ -148,8 +149,8 @@ object Config {
 
     case "beta" =>
       val dbSourceName = name.getOrElse("")
-      val mappings = s"jdbc:postgresql://192.168.121.164:5432/uaa?user=postgres&password=postgres"
-      val legacy = s"jdbc:postgresql://192.168.10.225:5432/yookos?user=postgres&password=postgres"
+      val mappings = s"jdbc:postgresql://192.168.121.178:5432/uaa?user=postgres&password=postgres"
+      val legacy = s"jdbc:postgresql://192.168.121.164:5432/yookos?user=postgres&password=postgres"
       if (dbSourceName == "mappings") mappings else legacy
 
   }

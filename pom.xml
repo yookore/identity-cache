@@ -71,7 +71,7 @@
     <dependency>
       <groupId>net.debasishg</groupId>
       <artifactId>redisclient_${scala.compat.version}</artifactId>
-      <version>2.11</version>
+      <version>3.0</version>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>

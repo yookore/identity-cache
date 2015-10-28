@@ -51,7 +51,7 @@ object App extends App {
   
   var count = new java.util.concurrent.atomic.AtomicInteger(0)
   val totalLegacyUsers = 2124155L
-  val cachedIndex = if (cache.get("latest_idcache_index") == None) 0 else cache.get[Int]("latest_idcache_index").get
+  var cachedIndex = if (cache.get("latest_idcache_index") == None) 0 else cache.get[Int]("latest_idcache_index").get
 
   val df = sqlContext.load("jdbc", Map(
     "url" -> Config.dataSourceUrl(mode, Some("mappings")),
@@ -61,8 +61,8 @@ object App extends App {
 
   df.select(df("id"), df("password"), df("username"), df("email"), df("phonenumber")).collect().foreach(row => {
     
-    count.incrementAndGet()
-    cache.set("latest_idcache_index", count)
+    cachedIndex = cachedIndex + 1
+    cache.set("latest_idcache_index", cachedIndex)
     
     cache.set("idcache:" + row.getString(3), write(EmailKeyedCache(row.getString(0), row.getString(1))))
     cache.set("idcache:" + row.getString(2), "idcache:" + row.getString(3))
