@@ -49,16 +49,14 @@ object Config {
       conf.set("spark.driver.host", driverHost)
       conf.set("spark.logConf", "true")
       conf.set("spark.akka.logLifecycleEvents", "true")
-      conf.set("spark.cassandra.connection.host", "localhost")
+      conf.set("spark.driver.allowMultipleContexts", "true")
 
     case "sandbox" => 
       conf.setAppName("Yookore User Account Analytics")
       conf.setMaster("yarn-client")
       conf.set("spark.logConf", "true")
       conf.set("spark.akka.logLifecycleEvents", "true")
-      conf.set("spark.cassandra.connection.host", "192.168.10.200")
-      conf.set("spark.cassandra.auth.username", "cassandra")
-      conf.set("spark.cassandra.auth.password", "cassandra")
+      conf.set("spark.driver.allowMultipleContexts", "true")
       //.set("spark.driver.port", "58522")
 
     case "dev" =>
@@ -66,9 +64,7 @@ object Config {
       conf.setMaster("yarn-client")
       conf.set("spark.logConf", "true")
       conf.set("spark.akka.logLifecycleEvents", "true")
-      conf.set("spark.cassandra.connection.host", "192.168.10.200")
-      conf.set("spark.cassandra.auth.username", "cassandra")
-      conf.set("spark.cassandra.auth.password", "cassandra")
+      conf.set("spark.driver.allowMultipleContexts", "true")
     
     case "beta" =>
       println("===Running in beta mode===")
@@ -79,52 +75,50 @@ object Config {
       conf.setMaster("local[*]")
       conf.set("spark.logConf", "true")
       conf.set("spark.akka.logLifecycleEvents", "true")
+      conf.set("spark.driver.allowMultipleContexts", "true")
       // Uses all cores by default
       //conf.set("spark.executor.cores", "4")
       //conf.set("spark.driver.maxResultSize", "0")
       //conf.set("spark.driver.memory", "2g")
       //conf.set("spark.executor.memory", "6g")
-      conf.set("spark.cassandra.connection.host", "192.168.121.171")
-      conf.set("spark.cassandra.auth.username", "cassandra")
-      conf.set("spark.cassandra.auth.password", "Gonzo@7072")
 
     case "production" =>
       conf.setAppName("Yookore User Account Analytics")
       conf.setMaster("yarn-client")
       conf.set("spark.logConf", "true")
       conf.set("spark.akka.logLifecycleEvents", "true")
-      conf.set("spark.cassandra.connection.host", "192.168.10.200")
-      conf.set("spark.cassandra.auth.username", "cassandra")
-      conf.set("spark.cassandra.auth.password", "cassandra")
+      conf.set("spark.driver.allowMultipleContexts", "true")
       
   }
 
-  import com.redis.RedisClient
+  /*import com.redis.RedisClient
   import com.redis.cluster._
-  import com.redis.serialization.Format
+  import com.redis.serialization.Format*/
+  
+  import redis.clients.jedis._
 
   def redisClient(env: String) = env match {
     case "local" => 
-      val r = new RedisClient("localhost", 6379)
-      r
+      val jedis = new Jedis("localhost");
+      jedis
 
     case "dev" =>
-      val nodes = Array(ClusterNode("node1", "192.168.10.4", 6379), ClusterNode("node2", "192.168.10.5", 6379), ClusterNode("node3", "192.168.10.98", 6379))
-      val r = new RedisCluster(new WrappedArray.ofRef(nodes): _*) {
-        val keyTag = Some(RegexKeyTag)   
-      }
-      r
+      var jedisClusterNodes = new java.util.HashSet[HostAndPort]
+      //val jedisClusterNodes = Set[HostAndPort]()
+      jedisClusterNodes.add(new HostAndPort("192.168.10.4", 6379))
+      jedisClusterNodes.add(new HostAndPort("192.168.10.5", 6379))
+      jedisClusterNodes.add(new HostAndPort("192.168.10.98", 6379))
+      val jc = new JedisCluster(jedisClusterNodes);
+      jc
     
     case "beta" =>
-      val nodes = Array(
-          ClusterNode("yks-redis01.mid.cpwv.com", "192.168.121.165", 6379),
-          ClusterNode("yks-redis02.mid.cpwv.com", "192.168.121.166", 6379),
-          ClusterNode("yks-redis04.mid.cpwv.com", "192.168.121.167", 6379)
-        )
-      val r = new RedisCluster(new WrappedArray.ofRef(nodes): _*) {
-        val keyTag = Some(RegexKeyTag)
-      }
-      r
+      val jedisClusterNodes = new java.util.HashSet[HostAndPort]
+      //val jedisClusterNodes = Set[HostAndPort]()
+      jedisClusterNodes.add(new HostAndPort("192.168.121.165", 6379))
+      jedisClusterNodes.add(new HostAndPort("192.168.121.166", 6379))
+      jedisClusterNodes.add(new HostAndPort("192.168.121.167", 6379))
+      val jc = new JedisCluster(jedisClusterNodes);
+      jc
   }
 
   def dataSourceUrl(env: String, name: Option[String]): String = env match {

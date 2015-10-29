@@ -46,12 +46,12 @@ object App extends App {
   
   // serializes objects from redis into
   // desired types
-  import com.redis.serialization._
-  import Parse.Implicits._
+  //import com.redis.serialization._
+  //import Parse.Implicits._
   
   var count = new java.util.concurrent.atomic.AtomicInteger(0)
   val totalLegacyUsers = 2124155L
-  var cachedIndex = if (cache.get("latest_idcache_index") == None) 0 else cache.get[Int]("latest_idcache_index").get
+  var cachedIndex = if (cache.get("latest_idcache_index") == null) 0 else cache.get("latest_idcache_index").toInt
 
   val df = sqlContext.load("jdbc", Map(
     "url" -> Config.dataSourceUrl(mode, Some("mappings")),
@@ -62,7 +62,7 @@ object App extends App {
   df.select(df("id"), df("password"), df("username"), df("email"), df("phonenumber")).collect().foreach(row => {
     
     cachedIndex = cachedIndex + 1
-    cache.set("latest_idcache_index", cachedIndex)
+    cache.set("latest_idcache_index", cachedIndex.toString)
     
     cache.set("idcache:" + row.getString(3), write(EmailKeyedCache(row.getString(0), row.getString(1))))
     cache.set("idcache:" + row.getString(2), "idcache:" + row.getString(3))
@@ -71,7 +71,7 @@ object App extends App {
       cache.set("idcache:" + row.getString(4), "idcache:" + row.getString(3))
     }
 
-    println("===Latest idcache cachedIndex=== " + cache.get[Int]("latest_idcache_index").get)
+    println("===Latest idcache cachedIndex=== " + cache.get("latest_idcache_index").toInt)
   
   })
 
